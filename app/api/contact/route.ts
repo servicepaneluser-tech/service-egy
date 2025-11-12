@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       )
     }
 
-    // Format email content
+    // Format email content (remove emoji from subject to avoid spam)
     const emailSubject = `طلب صيانة جديد من ${name}`
     const emailBody = `
 طلب صيانة جديد من موقع Service Egy
@@ -108,11 +108,17 @@ ${details ? `- تفاصيل إضافية: ${details}` : ""}
     }
 
     // Send email
+    // Important: Use the same email as SMTP_USER for From address to avoid spam
     const mailOptions = {
-      from: `"Service Egy" <${smtpFrom}>`,
+      from: `"Service Egy" <${smtpUser}>`, // Use SMTP_USER, not SMTP_FROM
       to: smtpTo,
+      replyTo: smtpUser, // Reply to the same email
       subject: emailSubject,
       text: emailBody,
+      headers: {
+        "X-Mailer": "Service Egy Contact Form",
+        "MIME-Version": "1.0",
+      },
       html: `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
